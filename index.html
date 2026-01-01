@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <title>Escape Photo - Frontend</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+		<link rel="manifest" href="manifest.json">
+		<meta name="theme-color" content="#000000">
+
+
+</head>
+<body class="mode-front">
+<div class="app-container">
+
+    <header class="app-header">
+        <h1>Escape Photo</h1>
+        <button id="btnGoSetup" class="btn-header">Setup mockup</button>
+    </header>
+
+    <main class="app-main">
+
+        <!-- ANTEPRIMA -->
+        <section class="preview-section">
+            <div class="canvas-wrapper">
+                <canvas id="frontCanvas" width="1080" height="1080"></canvas>
+            </div>
+        </section>
+
+        <!-- CONTROLLI -->
+        <section class="controls-section">
+
+            <div class="controls-group">
+                <label>Mockup:</label>
+                <select id="frontMockupSelect">
+                    <option value="">-- Seleziona mockup --</option>
+                </select>
+            </div>
+
+            <div class="controls-group">
+                <label>Nome squadra:</label>
+                <input type="text" id="frontTeamName" placeholder="Nome squadra" />
+            </div>
+
+            <div class="controls-group">
+                <label>Punteggio:</label>
+                <input type="text" id="frontScore" placeholder="Es: 5/10" />
+            </div>
+
+            <div class="controls-group">
+                <label>Data:</label>
+                <input type="date" id="frontDateField" />
+            </div>
+
+            <hr />
+
+            <div class="controls-group">
+                <button id="frontBtnCamera">Scatta foto</button>
+                <button id="frontBtnLoadPhoto">Carica foto</button>
+                <button id="frontBtnClearPhoto">Cancella foto</button>
+                <input type="file" id="frontPhotoInput" accept="image/*" style="display:none;" />
+            </div>
+
+            <div class="controls-group">
+                <label>Zoom foto:</label>
+                <input type="range" id="frontPhotoZoom" min="0.3" max="2" step="0.05" value="1" />
+                <small>Trascina la foto per posizionarla sotto l'overlay.</small>
+            </div>
+
+            <hr />
+
+            <div class="controls-group">
+                <label>Formato stampa:</label>
+                <select id="frontPrintFormat">
+                    <option value="a4">A4</option>
+                    <option value="a5">A5</option>
+                </select>
+            </div>
+
+            <div class="controls-group">
+                <button id="frontBtnPrint">Stampa</button>
+                <button id="frontBtnSave">Salva immagine</button>
+                <button id="frontBtnShare">Condividi</button>
+            </div>
+
+        </section>
+    </main>
+
+</div>
+
+<!-- STREAM FOTOCAMERA -->
+<video id="frontCameraStream" autoplay playsinline style="display:none;"></video>
+
+<script src="shared.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
