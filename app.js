@@ -1,299 +1,240 @@
-let mockups = loadMockupConfig();
+/* ============================================================
+   FRONTEND APP
+   MindTrap Escape Room
+============================================================ */
 
-const frontMockupSelect = document.getElementById("frontMockupSelect");
-const frontTeamName = document.getElementById("frontTeamName");
-const frontScore = document.getElementById("frontScore");
-const frontDateField = document.getElementById("frontDateField");
-const cameraFacingSelect = document.getElementById("cameraFacing");
+let frontCanvas = document.getElementById("frontCanvas");
+let frontCtx = frontCanvas.getContext("2d");
 
-const frontCanvas = document.getElementById("frontCanvas");
-const frontCtx = frontCanvas.getContext("2d");
-const frontVideo = document.getElementById("frontVideo");
+let frontVideo = document.getElementById("frontVideo");
 
-const frontBtnCamera = document.getElementById("frontBtnCamera");
-const frontBtnResetPhoto = document.getElementById("frontBtnResetPhoto");
-const frontBtnDownload = document.getElementById("frontBtnDownload");
-const frontBtnPrint = document.getElementById("frontBtnPrint");
+let frontMockupSelect = document.getElementById("frontMockupSelect");
+let frontTeamName = document.getElementById("frontTeamName");
+let frontScore = document.getElementById("frontScore");
+let frontDateField = document.getElementById("frontDateField");
+let cameraFacing = document.getElementById("cameraFacing");
 
-let frontCurrentMockupId = "mockup1";
-let frontMockupImage = new Image();
-let frontPhotoImage = new Image();
-let frontPhotoLoaded = false;
-let frontPhotoScale = 1;
-let frontPhotoOffsetX = 0;
-let frontPhotoOffsetY = 0;
+let frontBtnCamera = document.getElementById("frontBtnCamera");
+let frontBtnResetPhoto = document.getElementById("frontBtnResetPhoto");
+let frontBtnDownload = document.getElementById("frontBtnDownload");
+let frontBtnPrint = document.getElementById("frontBtnPrint");
 
-let frontVideoStream = null;
-let isCameraActive = false;
+frontCanvas.width = 800;
+frontCanvas.height = 1066;
 
-// Touch gesture data
-let touchState = {
-    dragging: false,
-    lastX: 0,
-    lastY: 0,
-    pinch: false,
-    lastDist: 0
+let currentMockup = null;
+let mockupImage = new Image();
+
+let photo = {
+    img: null,
+    x: 0,
+    y: 0,
+    scale: 1
 };
 
-function resizeFrontCanvas() {
-    const rect = frontCanvas.parentElement.getBoundingClientRect();
-    frontCanvas.width = rect.width;
-    frontCanvas.height = rect.height;
-    frontDrawCanvas();
-}
+let drag = { active: false, x: 0, y: 0 };
+let pinch = { active: false, startDist: 0, startScale: 1 };
 
-function frontLoadMockupList() {
-    // Popola select dalla config
+/* ============================================================
+   LOAD MOCKUPS
+============================================================ */
+
+function loadMockupListFrontend() {
+    let list = loadMockupConfig();
     frontMockupSelect.innerHTML = "";
-    for (const key in mockups) {
-        const opt = document.createElement("option");
+
+    Object.keys(list).forEach(key => {
+        let opt = document.createElement("option");
         opt.value = key;
-        opt.textContent = mockups[key].label;
+        opt.textContent = key;
         frontMockupSelect.appendChild(opt);
+    });
+
+    if (Object.keys(list).length > 0) {
+        frontMockupSelect.value = Object.keys(list)[0];
+        loadMockupFrontend(frontMockupSelect.value);
     }
-    frontCurrentMockupId = frontMockupSelect.value;
-    frontMockupImage.src = mockups[frontCurrentMockupId].image;
-    frontMockupImage.onload = frontDrawCanvas;
 }
 
-function frontDrawCanvas() {
-    const w = frontCanvas.width;
-    const h = frontCanvas.height;
-    frontCtx.clearRect(0, 0, w, h);
-    frontCtx.fillStyle = "#000000";
-    frontCtx.fillRect(0, 0, w, h);
+function loadMockupFrontend(name) {
+    let config = loadMockupConfig();
+    currentMockup = config[name];
 
-    const cfg = mockups[frontCurrentMockupId];
-    if (!cfg) return;
+    if (!currentMockup) return;
 
-    // Disegna mockup
-    if (frontMockupImage.complete && frontMockupImage.naturalWidth > 0) {
-        const iw = frontMockupImage.naturalWidth;
-        const ih = frontMockupImage.naturalHeight;
-        const scale = Math.max(w / iw, h / ih);
-        const dw = iw * scale;
-        const dh = ih * scale;
-        const dx = (w - dw) / 2;
-        const dy = (h - dh) / 2;
-        frontCtx.drawImage(frontMockupImage, dx, dy, dw, dh);
-    }
-
-    // Disegna foto se presente
-    if (frontPhotoLoaded && frontPhotoImage.complete && frontPhotoImage.naturalWidth > 0) {
-        const iw = frontPhotoImage.naturalWidth;
-        const ih = frontPhotoImage.naturalHeight;
-        const baseScale = Math.max(w / iw, h / ih);
-        const scale = baseScale * frontPhotoScale;
-        const dw = iw * scale;
-        const dh = ih * scale;
-        const dx = (w - dw) / 2 + frontPhotoOffsetX;
-        const dy = (h - dh) / 2 + frontPhotoOffsetY;
-        frontCtx.drawImage(frontPhotoImage, dx, dy, dw, dh);
-    }
-
-    // Testi
-    const team = frontTeamName.value || "";
-    const score = frontScore.value || "";
-    const date = frontDateField.value || "";
-
-    const map = cfg.textStyles;
-
-    function drawText(text, styleCfg) {
-        if (!text) return;
-        const x = styleCfg.x * w;
-        const y = styleCfg.y * h;
-        let fontParts = [];
-        if (styleCfg.italic) fontParts.push("italic");
-        if (styleCfg.bold) fontParts.push("bold");
-        fontParts.push(styleCfg.size + "px");
-        fontParts.push("Impact, system-ui, sans-serif");
-        frontCtx.font = fontParts.join(" ");
-        frontCtx.fillStyle = styleCfg.color;
-        frontCtx.textAlign = styleCfg.align || "center";
-        frontCtx.textBaseline = "middle";
-        frontCtx.fillText(text, x, y);
-    }
-
-    drawText(team, map.team);
-    drawText(score, map.score);
-    drawText(date, map.date);
+    mockupImage.src = currentMockup.image;
+    mockupImage.onload = () => renderFrontCanvas();
 }
 
 frontMockupSelect.addEventListener("change", () => {
-    frontCurrentMockupId = frontMockupSelect.value;
-    const cfg = mockups[frontCurrentMockupId];
-    frontMockupImage.src = cfg.image;
-    frontMockupImage.onload = frontDrawCanvas;
+    loadMockupFrontend(frontMockupSelect.value);
 });
 
-frontTeamName.addEventListener("input", frontDrawCanvas);
-frontScore.addEventListener("input", frontDrawCanvas);
-frontDateField.addEventListener("input", frontDrawCanvas);
+/* ============================================================
+   CAMERA
+============================================================ */
 
-// Camera
 async function startCamera() {
-    if (isCameraActive) return;
-    const facing = cameraFacingSelect.value || "environment";
     try {
-        frontVideoStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: facing }
+        let stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: cameraFacing.value }
         });
-        frontVideo.srcObject = frontVideoStream;
+
+        frontVideo.srcObject = stream;
         frontVideo.classList.remove("hidden");
-        isCameraActive = true;
-        frontBtnCamera.textContent = "Scatta e usa foto";
     } catch (err) {
-        console.error("Errore camera:", err);
-        alert("Impossibile accedere alla fotocamera.");
+        alert("Errore fotocamera");
     }
-}
-
-function stopCamera() {
-    if (frontVideoStream) {
-        frontVideoStream.getTracks().forEach(t => t.stop());
-        frontVideoStream = null;
-    }
-    frontVideo.classList.add("hidden");
-    isCameraActive = false;
-    frontBtnCamera.textContent = "Scatta foto";
-}
-
-function capturePhoto() {
-    if (!frontVideoStream) return;
-    const tmpCanvas = document.createElement("canvas");
-    const vw = frontVideo.videoWidth;
-    const vh = frontVideo.videoHeight;
-    tmpCanvas.width = vw;
-    tmpCanvas.height = vh;
-    const tctx = tmpCanvas.getContext("2d");
-    tctx.drawImage(frontVideo, 0, 0, vw, vh);
-    const dataUrl = tmpCanvas.toDataURL("image/jpeg", 0.9);
-    frontPhotoImage = new Image();
-    frontPhotoImage.onload = () => {
-        frontPhotoLoaded = true;
-        frontPhotoScale = 1;
-        frontPhotoOffsetX = 0;
-        frontPhotoOffsetY = 0;
-        frontDrawCanvas();
-    };
-    frontPhotoImage.src = dataUrl;
-    stopCamera();
 }
 
 frontBtnCamera.addEventListener("click", () => {
-    if (!isCameraActive) {
+    if (frontVideo.classList.contains("hidden")) {
         startCamera();
-    } else {
-        capturePhoto();
+        frontBtnCamera.textContent = "Scatta foto";
+        return;
     }
+
+    // Scatta foto
+    let tempCanvas = document.createElement("canvas");
+    tempCanvas.width = frontCanvas.width;
+    tempCanvas.height = frontCanvas.height;
+    let tctx = tempCanvas.getContext("2d");
+
+    tctx.drawImage(frontVideo, 0, 0, tempCanvas.width, tempCanvas.height);
+
+    photo.img = new Image();
+    photo.img.src = tempCanvas.toDataURL();
+
+    photo.img.onload = () => {
+        frontVideo.classList.add("hidden");
+        renderFrontCanvas();
+    };
 });
+
+/* ============================================================
+   RESET PHOTO
+============================================================ */
 
 frontBtnResetPhoto.addEventListener("click", () => {
-    frontPhotoLoaded = false;
-    frontPhotoImage = new Image();
-    frontPhotoScale = 1;
-    frontPhotoOffsetX = 0;
-    frontPhotoOffsetY = 0;
-    frontDrawCanvas();
+    photo.img = null;
+    renderFrontCanvas();
 });
 
-// Pinch + drag sulla foto
+/* ============================================================
+   DRAG & PINCH PHOTO
+============================================================ */
+
+frontCanvas.addEventListener("pointerdown", e => {
+    drag.active = true;
+    drag.x = e.offsetX;
+    drag.y = e.offsetY;
+});
+
+frontCanvas.addEventListener("pointermove", e => {
+    if (!drag.active || !photo.img) return;
+
+    photo.x += e.offsetX - drag.x;
+    photo.y += e.offsetY - drag.y;
+
+    drag.x = e.offsetX;
+    drag.y = e.offsetY;
+
+    renderFrontCanvas();
+});
+
+frontCanvas.addEventListener("pointerup", () => drag.active = false);
+frontCanvas.addEventListener("pointercancel", () => drag.active = false);
+
+/* Touch pinch */
 frontCanvas.addEventListener("touchstart", e => {
-    if (e.touches.length === 1) {
-        touchState.dragging = true;
-        touchState.pinch = false;
-        touchState.lastX = e.touches[0].clientX;
-        touchState.lastY = e.touches[0].clientY;
-    } else if (e.touches.length === 2) {
-        touchState.dragging = false;
-        touchState.pinch = true;
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        touchState.lastDist = Math.hypot(dx, dy);
+    if (e.touches.length === 2) {
+        pinch.active = true;
+        pinch.startDist = getTouchDistance(e);
+        pinch.startScale = photo.scale;
     }
-}, { passive: false });
+});
 
 frontCanvas.addEventListener("touchmove", e => {
-    if (!frontPhotoLoaded) return;
-    e.preventDefault();
-    if (touchState.dragging && e.touches.length === 1) {
-        const x = e.touches[0].clientX;
-        const y = e.touches[0].clientY;
-        const dx = x - touchState.lastX;
-        const dy = y - touchState.lastY;
-        touchState.lastX = x;
-        touchState.lastY = y;
-        frontPhotoOffsetX += dx;
-        frontPhotoOffsetY += dy;
-        frontDrawCanvas();
-    } else if (touchState.pinch && e.touches.length === 2) {
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        const dist = Math.hypot(dx, dy);
-        const delta = dist - touchState.lastDist;
-        touchState.lastDist = dist;
-        const factor = 1 + delta / 300;
-        frontPhotoScale *= factor;
-        if (frontPhotoScale < 0.3) frontPhotoScale = 0.3;
-        if (frontPhotoScale > 5) frontPhotoScale = 5;
-        frontDrawCanvas();
-    }
-}, { passive: false });
+    if (!pinch.active || e.touches.length !== 2) return;
 
-frontCanvas.addEventListener("touchend", () => {
-    if (event.touches && event.touches.length === 0) {
-        touchState.dragging = false;
-        touchState.pinch = false;
-    }
+    let dist = getTouchDistance(e);
+    let scale = dist / pinch.startDist;
+
+    photo.scale = pinch.startScale * scale;
+    renderFrontCanvas();
 });
 
-// Download
-frontBtnDownload.addEventListener("click", () => {
-    const dataURL = frontCanvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = dataURL;
-    a.download = "escape-photo.png";
-    a.click();
-});
+frontCanvas.addEventListener("touchend", () => pinch.active = false);
 
-// Stampa in singola pagina
-frontBtnPrint.addEventListener("click", () => {
-    const dataURL = frontCanvas.toDataURL("image/png");
-    const win = window.open("", "_blank");
-    win.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Stampa Escape Photo</title>
-            <style>
-                @page { margin: 0; }
-                body { margin: 0; }
-                img.print-image { width: 100%; display: block; page-break-after: avoid; }
-            </style>
-        </head>
-        <body onload="window.print(); window.onafterprint = () => window.close();">
-            <img src="${dataURL}" class="print-image">
-        </body>
-        </html>
-    `);
-    win.document.close();
-});
-
-// Resize / rotazione: ridimensiona canvas
-window.addEventListener("resize", resizeFrontCanvas);
-
-// Init
-(function initFront() {
-    mockups = loadMockupConfig();
-    resizeFrontCanvas();
-    frontLoadMockupList();
-    const today = new Date().toISOString().substring(0, 10);
-    frontDateField.value = today;
-    frontDrawCanvas();
-})();
-
-// PWA Service Worker
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
+function getTouchDistance(e) {
+    let dx = e.touches[0].clientX - e.touches[1].clientX;
+    let dy = e.touches[0].clientY - e.touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
 }
+
+/* ============================================================
+   RENDER CANVAS
+============================================================ */
+
+function renderFrontCanvas() {
+    frontCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height);
+
+    // Foto
+    if (photo.img) {
+        let w = photo.img.width * photo.scale;
+        let h = photo.img.height * photo.scale;
+        frontCtx.drawImage(photo.img, photo.x, photo.y, w, h);
+    }
+
+    // Mockup
+    if (mockupImage.src) {
+        frontCtx.drawImage(mockupImage, 0, 0, frontCanvas.width, frontCanvas.height);
+    }
+
+    // Testi
+    if (currentMockup) {
+        drawField("team", frontTeamName.value);
+        drawField("score", frontScore.value);
+        drawField("date", frontDateField.value);
+    }
+}
+
+function drawField(key, value) {
+    let f = currentMockup.fields[key];
+
+    frontCtx.fillStyle = f.color;
+    frontCtx.font =
+        (f.bold ? "bold " : "") +
+        (f.italic ? "italic " : "") +
+        f.size + "px " + f.font;
+
+    frontCtx.fillText(value, f.x, f.y);
+}
+
+/* ============================================================
+   DOWNLOAD
+============================================================ */
+
+frontBtnDownload.addEventListener("click", () => {
+    let link = document.createElement("a");
+    link.download = "escape-photo.png";
+    link.href = frontCanvas.toDataURL();
+    link.click();
+});
+
+/* ============================================================
+   PRINT
+============================================================ */
+
+frontBtnPrint.addEventListener("click", () => {
+    let w = window.open("");
+    w.document.write("<img src='" + frontCanvas.toDataURL() + "'>");
+    w.print();
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+
+loadMockupListFrontend();
+renderFrontCanvas();

@@ -1,63 +1,189 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <title>Setup Mockup</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="app-body">
+/* ===========================
+   BASE
+=========================== */
 
-<div class="preview-section">
-    <div class="preview-wrapper">
-        <canvas id="setupCanvas"></canvas>
-    </div>
-    <p class="hint">Tocca un testo per selezionarlo. Tieni premuto per modificare.</p>
-</div>
+body, html {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    overflow: hidden;
+}
 
-<div class="form-section scrollable">
-    <label class="field-label">Mockup</label>
-    <select id="setupMockupSelect" class="field-input"></select>
+.hidden {
+    display: none !important;
+}
 
-    <div class="button-row">
-        <label class="btn secondary-btn">
-            Carica immagine mockup
-            <input type="file" id="setupUploadMockup" accept="image/*" hidden>
-        </label>
-    </div>
+h1, h2 {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
 
-    <div class="button-row">
-        <button id="setupBtnEditMockup" class="btn ghost-btn">Modifica mockup</button>
-        <button id="setupBtnDeleteMockup" class="btn secondary-btn">Cancella mockup</button>
-    </div>
+/* ===========================
+   FRONTEND LAYOUT
+=========================== */
 
-    <div class="button-row">
-        <button id="setupBtnSave" class="btn primary-btn">Salva configurazione</button>
-        <a href="index.html" class="btn ghost-btn">Torna al frontend</a>
-    </div>
-</div>
+.app-body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
 
-<!-- MENU LATERALE -->
-<div id="sideMenu" class="side-menu">
-    <h3>Modifica testo</h3>
+.preview-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
 
-    <label>Colore</label>
-    <input type="color" id="menuColor">
+.preview-wrapper {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 3/4;
+    background: #111;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #333;
+}
 
-    <label>Font</label>
-    <select id="menuFont">
-        <option value="Impact">Impact</option>
-        <option value="Anton">Anton</option>
-        <option value="Bebas Neue">Bebas Neue</option>
-        <option value="Arial Black">Arial Black</option>
-    </select>
+#frontCanvas, #frontVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-    <button id="menuBold">Bold</button>
-    <button id="menuItalic">Italic</button>
-    <button id="menuClose" class="secondary-btn">Chiudi</button>
-</div>
+.hint {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-top: 6px;
+}
 
-<script src="shared.js"></script>
-<script src="setup.js"></script>
-</body>
-</html>
+/* ===========================
+   FORM SECTION
+=========================== */
+
+.form-section {
+    background: #111;
+    padding: 12px;
+    border-top: 2px solid #222;
+    max-height: 45vh;
+    overflow-y: auto;
+}
+
+.field-label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+.field-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    background: #222;
+    color: #fff;
+    font-size: 1rem;
+}
+
+/* ===========================
+   BUTTONS
+=========================== */
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.primary-btn {
+    background: #e63946;
+    color: #fff;
+}
+
+.secondary-btn {
+    background: #444;
+    color: #fff;
+}
+
+.ghost-btn {
+    background: transparent;
+    border: 1px solid #666;
+    color: #fff;
+}
+
+.danger-btn {
+    background: #b00020;
+    color: #fff;
+}
+
+/* ===========================
+   SETUP PAGE
+=========================== */
+
+.setup-body {
+    background: #000;
+    color: #fff;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.setup-header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.setup-container {
+    padding-bottom: 40px;
+}
+
+.style-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+
+/* ===========================
+   MOCKUP EDITOR
+=========================== */
+
+.mockup-editor {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 3/4;
+    background: #111;
+    border: 2px solid #333;
+    margin: 15px auto;
+    position: relative;
+    overflow: hidden;
+}
+
+#setupCanvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+/* ===========================
+   SCROLL FIX
+=========================== */
+
+.scrollable {
+    overflow-y: auto;
+}

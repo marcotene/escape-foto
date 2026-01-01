@@ -1,91 +1,77 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>Setup Mockup - Escape Photo</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Setup Mockup - MindTrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="app-body">
-<div class="app-container">
-    <header class="app-header">
-        <h1>Setup Mockup</h1>
-        <p class="subtitle">MindTrap Escape Room</p>
-    </header>
 
-    <main class="app-main">
-        <section class="form-section">
-            <label class="field-label" for="setupMockupSelect">Mockup</label>
-            <select id="setupMockupSelect" class="field-input">
-                <option value="mockup1">Mockup 1</option>
-                <option value="mockup2">Mockup 2</option>
+<body class="setup-body">
 
-<div class="button-row">
-    <label class="btn secondary-btn">
-        Carica immagine mockup
-        <input type="file" id="setupUploadMockup" accept="image/*" hidden>
-    </label>
-</div>
+<header class="setup-header">
+  <h1>Setup Mockup</h1>
+  <h2>MindTrap Escape Room</h2>
+</header>
 
+<div class="setup-container">
 
-<div class="button-row">
-    <button id="setupBtnEditMockup" class="btn ghost-btn">Modifica mockup</button>
-    <button id="setupBtnDeleteMockup" class="btn secondary-btn">Cancella mockup</button>
-</div>
+  <!-- Selettore mockup -->
+  <label class="field-label" for="setupMockupSelect">Mockup</label>
+  <select id="setupMockupSelect" class="field-input"></select>
 
+  <div class="button-row">
+    <button id="setupBtnEditMockup" class="btn secondary-btn">Modifica mockup</button>
+    <button id="setupBtnDeleteMockup" class="btn danger-btn">Cancella mockup</button>
+  </div>
 
-<div class="button-row">
-    <button id="setupBtnEditMockup" class="btn ghost-btn">Modifica mockup</button>
-    <button id="setupBtnDeleteMockup" class="btn secondary-btn">Cancella mockup</button>
-</div>
+  <!-- Upload mockup -->
+  <label class="field-label">Carica immagine mockup</label>
+  <input id="setupMockupUpload" type="file" accept="image/*" class="field-input">
 
-            </select>
+  <!-- Selettore campo -->
+  <label class="field-label" for="setupFieldSelect">Campo</label>
+  <select id="setupFieldSelect" class="field-input">
+    <option value="team">Nome squadra</option>
+    <option value="score">Punteggio / tempo</option>
+    <option value="date">Data</option>
+  </select>
 
-            <label class="field-label" for="setupTextFieldSelect">Campo</label>
-            <select id="setupTextFieldSelect" class="field-input">
-                <option value="team">Nome squadra</option>
-                <option value="score">Punteggio / tempo</option>
-                <option value="date">Data</option>
-            </select>
+  <!-- Stile testo -->
+  <label class="field-label">Stile testo</label>
+  <div class="style-row">
+    <label><input type="checkbox" id="setupBold"> Bold</label>
+    <label><input type="checkbox" id="setupItalic"> Italic</label>
+  </div>
 
-            <label class="field-label">Stile testo</label>
-            <div class="inline-row">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="setupBold"> Bold
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="setupItalic"> Italic
-                </label>
-<label class="field-label">Font</label>
-<select id="setupFont" class="field-input">
+  <label class="field-label" for="setupFontSelect">Font</label>
+  <select id="setupFontSelect" class="field-input">
     <option value="Impact">Impact</option>
-    <option value="Anton">Anton</option>
-    <option value="Bebas Neue">Bebas Neue</option>
-    <option value="Arial Black">Arial Black</option>
-</select>
+    <option value="Arial">Arial</option>
+    <option value="Verdana">Verdana</option>
+    <option value="Courier New">Courier New</option>
+  </select>
 
-            </div>
+  <label class="field-label">Colore</label>
+  <input id="setupColor" type="color" class="field-input">
 
-            <label class="field-label" for="setupColor">Colore</label>
-            <input type="color" id="setupColor" class="field-input">
+  <!-- Canvas mockup -->
+  <div class="mockup-editor">
+    <canvas id="setupCanvas"></canvas>
+  </div>
 
-            <p class="hint">Trascina il testo sul mockup, usa due dita per cambiarne la dimensione.</p>
+  <p class="hint">Trascina il testo sul mockup, usa due dita per cambiarne la dimensione.</p>
 
-            <div class="button-row">
-                <button id="setupBtnSave" class="btn primary-btn">Salva configurazione</button>
-                <a href="index.html" class="btn ghost-btn">Torna al frontend</a>
-            </div>
-        </section>
+  <div class="button-row">
+    <button id="setupBtnSave" class="btn primary-btn">Salva configurazione</button>
+    <a href="index.html" class="btn ghost-btn">Torna al frontend</a>
+  </div>
 
-        <section class="preview-section">
-            <div class="preview-wrapper">
-                <canvas id="setupCanvas"></canvas>
-            </div>
-        </section>
-    </main>
 </div>
 
 <script src="shared.js"></script>
 <script src="setup.js"></script>
+
 </body>
 </html>

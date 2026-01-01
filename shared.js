@@ -1,44 +1,30 @@
-// Config base mockup: qui definisci immagini e testi
-const MOCKUPS = {
-    mockup1: {
-        id: "mockup1",
-        label: "Mockup 1",
-        image: "mockup1.jpg", // sostituisci con il tuo file reale
-        textStyles: {
-            team: { x: 0.5, y: 0.2, size: 40, align: "center", color: "#ffffff", bold: true, italic: false },
-            score: { x: 0.5, y: 0.3, size: 32, align: "center", color: "#ffcc00", bold: true, italic: false },
-            date: { x: 0.5, y: 0.4, size: 24, align: "center", color: "#ffffff", bold: false, italic: false }
-        }
-    },
-    mockup2: {
-        id: "mockup2",
-        label: "Mockup 2",
-        image: "mockup2.jpg",
-        textStyles: {
-            team: { x: 0.5, y: 0.75, size: 40, align: "center", color: "#ffffff", bold: true, italic: false },
-            score: { x: 0.5, y: 0.83, size: 32, align: "center", color: "#ff4444", bold: true, italic: false },
-            date: { x: 0.5, y: 0.9, size: 24, align: "center", color: "#ffffff", bold: false, italic: false }
-        }
-    }
-};
+/* ============================================================
+   SHARED STORAGE FOR MOCKUPS
+   MindTrap Escape Room
+============================================================ */
 
-function deepClone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
+const STORAGE_KEY = "escape_mockups";
 
-// Carica configurazione mockup da localStorage se esiste
+/* ============================================================
+   LOAD CONFIG
+============================================================ */
+
 function loadMockupConfig() {
-    const saved = localStorage.getItem("escapePhotoMockups");
-    if (!saved) return deepClone(MOCKUPS);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+
     try {
-        const parsed = JSON.parse(saved);
-        return parsed;
-    } catch {
-        return deepClone(MOCKUPS);
+        return JSON.parse(raw);
+    } catch (e) {
+        console.error("Errore parsing mockup config", e);
+        return {};
     }
 }
 
-// Salva configurazione mockup
+/* ============================================================
+   SAVE CONFIG
+============================================================ */
+
 function saveMockupConfig(config) {
-    localStorage.setItem("escapePhotoMockups", JSON.stringify(config));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
 }

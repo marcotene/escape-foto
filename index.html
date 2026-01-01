@@ -1,68 +1,55 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>Escape Photo - MindTrap</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Escape Photo - MindTrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="app-body">
-<div class="app-container">
-    <header class="app-header">
-        <h1>Escape Photo</h1>
-        <p class="subtitle">MindTrap Escape Room</p>
-    </header>
 
-    <main class="app-main">
-        <section class="form-section">
-            <label class="field-label" for="frontMockupSelect">Mockup</label>
-            <select id="frontMockupSelect" class="field-input">
-                <option value="mockup1">Mockup 1</option>
-                <option value="mockup2">Mockup 2</option>
-            </select>
+<div class="preview-section">
+  <div class="preview-wrapper">
+    <canvas id="frontCanvas"></canvas>
+    <video id="frontVideo" autoplay playsinline class="hidden"></video>
+  </div>
+  <p class="hint">Usa due dita per zoomare, trascina la foto per posizionarla.</p>
+</div>
 
-            <label class="field-label" for="frontTeamName">Nome squadra</label>
-            <input id="frontTeamName" class="field-input" type="text" placeholder="Team name">
+<div class="form-section scrollable">
+  <label class="field-label" for="frontMockupSelect">Mockup</label>
+  <select id="frontMockupSelect" class="field-input"></select>
 
-            <label class="field-label" for="frontScore">Punteggio / tempo</label>
-            <input id="frontScore" class="field-input" type="text" placeholder="Es: 58:32">
+  <label class="field-label" for="frontTeamName">Nome squadra</label>
+  <input id="frontTeamName" class="field-input" type="text">
 
-            <label class="field-label" for="frontDateField">Data</label>
-            <input id="frontDateField" class="field-input" type="date">
+  <label class="field-label" for="frontScore">Punteggio / tempo</label>
+  <input id="frontScore" class="field-input" type="text">
 
-            <div class="camera-controls">
-                <label class="field-label" for="cameraFacing">Fotocamera</label>
-                <select id="cameraFacing" class="field-input">
-                    <option value="environment">Posteriore</option>
-                    <option value="user">Frontale</option>
-                </select>
-            </div>
+  <label class="field-label" for="frontDateField">Data</label>
+  <input id="frontDateField" class="field-input" type="date">
 
-            <div class="button-row">
-                <button id="frontBtnCamera" class="btn primary-btn">Scatta foto</button>
-                <button id="frontBtnResetPhoto" class="btn secondary-btn">Reset foto</button>
-            </div>
+  <label class="field-label" for="cameraFacing">Fotocamera</label>
+  <select id="cameraFacing" class="field-input">
+    <option value="environment">Posteriore</option>
+    <option value="user">Frontale</option>
+  </select>
 
-            <div class="button-row">
-                <button id="frontBtnDownload" class="btn primary-btn">Scarica</button>
-                <button id="frontBtnPrint" class="btn secondary-btn">Stampa</button>
-            </div>
+  <div class="button-row">
+    <button id="frontBtnCamera" class="btn primary-btn">Scatta foto</button>
+    <button id="frontBtnResetPhoto" class="btn secondary-btn">Reset foto</button>
+  </div>
 
-            <div class="button-row">
-                <a href="setup.html" class="btn ghost-btn">Setup mockup</a>
-            </div>
-        </section>
+  <div class="button-row">
+    <button id="frontBtnDownload" class="btn primary-btn">Scarica</button>
+    <button id="frontBtnPrint" class="btn secondary-btn">Stampa</button>
+  </div>
 
-        <section class="preview-section">
-            <div class="preview-wrapper">
-                <canvas id="frontCanvas"></canvas>
-                <video id="frontVideo" autoplay playsinline class="hidden"></video>
-            </div>
-            <p class="hint">Usa due dita per zoomare, trascina la foto per posizionarla.</p>
-        </section>
-    </main>
+  <div class="button-row">
+    <a href="setup.html" class="btn ghost-btn">Setup mockup</a>
+  </div>
 </div>
 
 <script src="shared.js"></script>

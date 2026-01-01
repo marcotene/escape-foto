@@ -1,11 +1,20 @@
-// Aggiorna subito il service worker senza attendere
-self.addEventListener("install", () => self.skipWaiting());
+/* ============================================================
+   SERVICE WORKER — CACHE DISABLED
+   MindTrap Escape Room
+============================================================ */
 
-// Prende subito il controllo delle pagine aperte
-self.addEventListener("activate", () => clients.claim());
+self.addEventListener("install", () => {
+    // Salta subito la fase di waiting
+    self.skipWaiting();
+});
 
-// Strategia: rete prima, cache come fallback
+self.addEventListener("activate", () => {
+    // Prende immediatamente il controllo delle pagine aperte
+    clients.claim();
+});
+
 self.addEventListener("fetch", event => {
+    // Nessuna cache: sempre rete, fallback a cache solo se necessario
     event.respondWith(
         fetch(event.request).catch(() => caches.match(event.request))
     );
