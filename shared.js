@@ -1,39 +1,44 @@
-/* ============================================================
-   SHARED.JS
-   Funzioni comuni per gestione mockup (front-end + setup)
-   ============================================================ */
+// Config base mockup: qui definisci immagini e testi
+const MOCKUPS = {
+    mockup1: {
+        id: "mockup1",
+        label: "Mockup 1",
+        image: "mockup1.jpg", // sostituisci con il tuo file reale
+        textStyles: {
+            team: { x: 0.5, y: 0.2, size: 40, align: "center", color: "#ffffff", bold: true, italic: false },
+            score: { x: 0.5, y: 0.3, size: 32, align: "center", color: "#ffcc00", bold: true, italic: false },
+            date: { x: 0.5, y: 0.4, size: 24, align: "center", color: "#ffffff", bold: false, italic: false }
+        }
+    },
+    mockup2: {
+        id: "mockup2",
+        label: "Mockup 2",
+        image: "mockup2.jpg",
+        textStyles: {
+            team: { x: 0.5, y: 0.75, size: 40, align: "center", color: "#ffffff", bold: true, italic: false },
+            score: { x: 0.5, y: 0.83, size: 32, align: "center", color: "#ff4444", bold: true, italic: false },
+            date: { x: 0.5, y: 0.9, size: 24, align: "center", color: "#ffffff", bold: false, italic: false }
+        }
+    }
+};
 
-const MOCKUP_STORAGE_KEY = "escape_mockups_v1";
+function deepClone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
 
-/**
- * Legge tutti i mockup salvati in localStorage.
- * Ritorna sempre un array (anche se vuoto).
- */
-function loadAllMockups() {
+// Carica configurazione mockup da localStorage se esiste
+function loadMockupConfig() {
+    const saved = localStorage.getItem("escapePhotoMockups");
+    if (!saved) return deepClone(MOCKUPS);
     try {
-        const raw = localStorage.getItem(MOCKUP_STORAGE_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return [];
+        const parsed = JSON.parse(saved);
         return parsed;
-    } catch (e) {
-        console.error("Errore lettura mockup:", e);
-        return [];
+    } catch {
+        return deepClone(MOCKUPS);
     }
 }
 
-/**
- * Salva l'intera lista mockup in localStorage.
- * Accetta un array di mockup.
- */
-function saveAllMockups(list) {
-    try {
-        if (!Array.isArray(list)) {
-            console.error("saveAllMockups: lista non valida");
-            return;
-        }
-        localStorage.setItem(MOCKUP_STORAGE_KEY, JSON.stringify(list));
-    } catch (e) {
-        console.error("Errore salvataggio mockup:", e);
-    }
+// Salva configurazione mockup
+function saveMockupConfig(config) {
+    localStorage.setItem("escapePhotoMockups", JSON.stringify(config));
 }

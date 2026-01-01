@@ -1,11 +1,11 @@
 {
-  "name": "Escape Photo",
+  "name": "Escape Photo - MindTrap",
   "short_name": "EscapePhoto",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "portrait",
+  "orientation": "any",
   "icons": [
     {
       "src": "icon-192.png",

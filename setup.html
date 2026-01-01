@@ -1,111 +1,63 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8" />
-    <title>Escape Photo - Setup Mockup</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>Setup Mockup - Escape Photo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="stylesheet" href="style.css">
 </head>
-
-<body class="mode-setup">
+<body class="app-body">
 <div class="app-container">
-
-    <!-- HEADER -->
     <header class="app-header">
         <h1>Setup Mockup</h1>
-        <button id="btnGoFront" class="btn-header">Vai alla funzione foto</button>
+        <p class="subtitle">MindTrap Escape Room</p>
     </header>
 
-    <!-- MAIN -->
     <main class="app-main">
+        <section class="form-section">
+            <label class="field-label" for="setupMockupSelect">Mockup</label>
+            <select id="setupMockupSelect" class="field-input">
+                <option value="mockup1">Mockup 1</option>
+                <option value="mockup2">Mockup 2</option>
+            </select>
 
-        <!-- ANTEPRIMA -->
-        <section class="preview-section">
-            <div class="canvas-wrapper">
-                <canvas id="setupCanvas" width="1080" height="1080"></canvas>
+            <label class="field-label" for="setupTextFieldSelect">Campo</label>
+            <select id="setupTextFieldSelect" class="field-input">
+                <option value="team">Nome squadra</option>
+                <option value="score">Punteggio / tempo</option>
+                <option value="date">Data</option>
+            </select>
+
+            <label class="field-label">Stile testo</label>
+            <div class="inline-row">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="setupBold"> Bold
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="setupItalic"> Italic
+                </label>
+            </div>
+
+            <label class="field-label" for="setupColor">Colore</label>
+            <input type="color" id="setupColor" class="field-input">
+
+            <p class="hint">Trascina il testo sul mockup, usa due dita per cambiarne la dimensione.</p>
+
+            <div class="button-row">
+                <button id="setupBtnSave" class="btn primary-btn">Salva configurazione</button>
+                <a href="index.html" class="btn ghost-btn">Torna al frontend</a>
             </div>
         </section>
 
-        <!-- CONTROLLI -->
-        <section class="controls-section">
-
-            <!-- SELEZIONE MOCKUP -->
-            <div class="controls-group">
-                <label>Mockup esistenti:</label>
-                <select id="setupMockupSelect">
-                    <option value="">-- Nuovo o seleziona --</option>
-                </select>
+        <section class="preview-section">
+            <div class="preview-wrapper">
+                <canvas id="setupCanvas"></canvas>
             </div>
-
-            <div class="controls-group">
-                <button id="setupBtnNew">Nuovo mockup</button>
-                <button id="setupBtnDelete">Cancella mockup</button>
-            </div>
-
-            <hr />
-
-            <!-- NOME MOCKUP -->
-            <div class="controls-group">
-                <label>Nome mockup:</label>
-                <input type="text" id="setupMockupName" placeholder="Es: Stanza Horror" />
-            </div>
-
-            <!-- OVERLAY -->
-            <div class="controls-group">
-                <label>Carica overlay (PNG trasparente):</label>
-                <input type="file" id="setupOverlayInput" accept="image/*" />
-            </div>
-
-            <hr />
-
-            <!-- STILI TESTO -->
-            <div class="controls-group">
-                <h3>Stili testo</h3>
-                <label>Tipo testo:</label>
-                <select id="setupTextType">
-                    <option value="team">Nome squadra</option>
-                    <option value="score">Punteggio</option>
-                    <option value="date">Data</option>
-                </select>
-            </div>
-
-            <div class="controls-group">
-                <label>Dimensione font:</label>
-                <input type="range" id="setupFontSize" min="20" max="120" step="2" value="64" />
-            </div>
-
-            <div class="controls-group">
-                <label>Colore:</label>
-                <input type="color" id="setupFontColor" value="#ffffff" />
-            </div>
-
-            <div class="controls-group">
-                <label>Font:</label>
-                <select id="setupFontFamily">
-                    <option value="Arial">Arial</option>
-                    <option value="Impact">Impact</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Verdana">Verdana</option>
-                </select>
-            </div>
-
-            <div class="controls-group">
-                <small>Trascina i testi sul canvas per posizionarli.</small>
-            </div>
-
-            <div class="controls-group">
-                <button id="setupBtnSave">Salva mockup</button>
-            </div>
-
         </section>
     </main>
-
 </div>
 
-<!-- SCRIPT -->
 <script src="shared.js"></script>
 <script src="setup.js"></script>
-
 </body>
 </html>

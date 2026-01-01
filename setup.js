@@ -1,327 +1,206 @@
-/* ============================================================
-   SETUP.JS
-   Editor mockup avanzato (backend)
-   ============================================================ */
-
-const setupCanvas = document.getElementById("setupCanvas");
-const sctx = setupCanvas.getContext("2d");
+let setupMockups = loadMockupConfig();
 
 const setupMockupSelect = document.getElementById("setupMockupSelect");
-const setupBtnNew = document.getElementById("setupBtnNew");
-const setupBtnDelete = document.getElementById("setupBtnDelete");
-const setupMockupName = document.getElementById("setupMockupName");
-const setupOverlayInput = document.getElementById("setupOverlayInput");
-
-const setupTextType = document.getElementById("setupTextType");
-const setupFontSize = document.getElementById("setupFontSize");
-const setupFontColor = document.getElementById("setupFontColor");
-const setupFontFamily = document.getElementById("setupFontFamily");
+const setupTextFieldSelect = document.getElementById("setupTextFieldSelect");
+const setupBold = document.getElementById("setupBold");
+const setupItalic = document.getElementById("setupItalic");
+const setupColor = document.getElementById("setupColor");
 const setupBtnSave = document.getElementById("setupBtnSave");
 
-const btnGoFront = document.getElementById("btnGoFront");
+const setupCanvas = document.getElementById("setupCanvas");
+const setupCtx = setupCanvas.getContext("2d");
 
-btnGoFront.addEventListener("click", () => {
-    window.location.href = "index.html";
-});
+let setupCurrentMockupId = "mockup1";
+let setupMockupImage = new Image();
 
-let setupOverlayImage = null;
-let currentMockupIndex = null;
-
-/* ============================================================
-   OGGETTI TESTO DI DEFAULT
-   ============================================================ */
-let setupTextObjects = {
-    team: { text: "Squadra", x: 540, y: 150, size: 64, color: "#ffffff", font: "Arial" },
-    score: { text: "Punteggio", x: 540, y: 260, size: 64, color: "#ffffff", font: "Arial" },
-    date: { text: "Data", x: 540, y: 370, size: 48, color: "#ffffff", font: "Arial" }
+let currentField = "team";
+let touchStateSetup = {
+    dragging: false,
+    lastX: 0,
+    lastY: 0,
+    pinch: false,
+    lastDist: 0
 };
 
-let setupDraggingKey = null;
-let setupDragOffsetX = 0;
-let setupDragOffsetY = 0;
-
-/* ============================================================
-   DISEGNO CANVAS
-   ============================================================ */
-function setupDrawCanvas() {
-    sctx.clearRect(0, 0, setupCanvas.width, setupCanvas.height);
-    sctx.fillStyle = "#000";
-    sctx.fillRect(0, 0, setupCanvas.width, setupCanvas.height);
-
-    if (setupOverlayImage) {
-        sctx.drawImage(setupOverlayImage, 0, 0, setupCanvas.width, setupCanvas.height);
-    }
-
-    Object.values(setupTextObjects).forEach(obj => {
-        sctx.font = `${obj.size}px ${obj.font}`;
-        sctx.textAlign = "center";
-        sctx.strokeStyle = "black";
-        sctx.lineWidth = 4;
-        sctx.fillStyle = obj.color;
-        sctx.strokeText(obj.text, obj.x, obj.y);
-        sctx.fillText(obj.text, obj.x, obj.y);
-    });
+function resizeSetupCanvas() {
+    const rect = setupCanvas.parentElement.getBoundingClientRect();
+    setupCanvas.width = rect.width;
+    setupCanvas.height = rect.height;
+    setupDrawCanvas();
 }
 
-/* ============================================================
-   CARICA LISTA MOCKUP
-   ============================================================ */
 function setupLoadMockupList() {
-    const list = loadAllMockups();
-    setupMockupSelect.innerHTML = '<option value="">-- Nuovo o seleziona --</option>';
-
-    list.forEach((m, index) => {
+    setupMockupSelect.innerHTML = "";
+    for (const key in setupMockups) {
         const opt = document.createElement("option");
-        opt.value = index;
-        opt.textContent = m.name;
+        opt.value = key;
+        opt.textContent = setupMockups[key].label;
         setupMockupSelect.appendChild(opt);
-    });
+    }
+    setupCurrentMockupId = setupMockupSelect.value;
+    setupMockupImage.src = setupMockups[setupCurrentMockupId].image;
+    setupMockupImage.onload = setupDrawCanvas;
 }
 
-/* ============================================================
-   SELEZIONE MOCKUP
-   ============================================================ */
+function setupDrawCanvas() {
+    const w = setupCanvas.width;
+    const h = setupCanvas.height;
+    setupCtx.clearRect(0, 0, w, h);
+    setupCtx.fillStyle = "#000000";
+    setupCtx.fillRect(0, 0, w, h);
+
+    const cfg = setupMockups[setupCurrentMockupId];
+    if (!cfg) return;
+
+    if (setupMockupImage.complete && setupMockupImage.naturalWidth > 0) {
+        const iw = setupMockupImage.naturalWidth;
+        const ih = setupMockupImage.naturalHeight;
+        const scale = Math.max(w / iw, h / ih);
+        const dw = iw * scale;
+        const dh = ih * scale;
+        const dx = (w - dw) / 2;
+        const dy = (h - dh) / 2;
+        setupCtx.drawImage(setupMockupImage, dx, dy, dw, dh);
+    }
+
+    const map = cfg.textStyles;
+
+    function drawText(label, key, styleCfg) {
+        const x = styleCfg.x * w;
+        const y = styleCfg.y * h;
+        let fontParts = [];
+        if (styleCfg.italic) fontParts.push("italic");
+        if (styleCfg.bold) fontParts.push("bold");
+        fontParts.push(styleCfg.size + "px");
+        fontParts.push("Impact, system-ui, sans-serif");
+        setupCtx.font = fontParts.join(" ");
+        setupCtx.fillStyle = styleCfg.color;
+        setupCtx.textAlign = styleCfg.align || "center";
+        setupCtx.textBaseline = "middle";
+        const text = label + " (" + key + ")";
+        setupCtx.fillText(text, x, y);
+        if (key === currentField) {
+            setupCtx.strokeStyle = "#ff4444";
+            setupCtx.lineWidth = 2;
+            const metrics = setupCtx.measureText(text);
+            const width = metrics.width;
+            const height = styleCfg.size;
+            setupCtx.strokeRect(x - width / 2 - 4, y - height / 2 - 4, width + 8, height + 8);
+        }
+    }
+
+    drawText("Nome squadra", "team", map.team);
+    drawText("Punteggio/tempo", "score", map.score);
+    drawText("Data", "date", map.date);
+}
+
 setupMockupSelect.addEventListener("change", () => {
-    const list = loadAllMockups();
-    const val = setupMockupSelect.value;
-
-    if (val === "") {
-        currentMockupIndex = null;
-        setupMockupName.value = "";
-        setupOverlayImage = null;
-        setupTextObjects = {
-            team: { text: "Squadra", x: 540, y: 150, size: 64, color: "#ffffff", font: "Arial" },
-            score: { text: "Punteggio", x: 540, y: 260, size: 64, color: "#ffffff", font: "Arial" },
-            date: { text: "Data", x: 540, y: 370, size: 48, color: "#ffffff", font: "Arial" }
-        };
-        setupDrawCanvas();
-        return;
-    }
-
-    currentMockupIndex = parseInt(val, 10);
-    const m = list[currentMockupIndex];
-
-    setupMockupName.value = m.name || "";
-    setupTextObjects = m.textStyles || setupTextObjects;
-
-    if (m.overlayDataURL) {
-        const img = new Image();
-        img.onload = () => {
-            setupOverlayImage = img;
-            setupDrawCanvas();
-        };
-        img.src = m.overlayDataURL;
-    } else {
-        setupOverlayImage = null;
-        setupDrawCanvas();
-    }
-
-    const key = setupTextType.value;
-    const obj = setupTextObjects[key];
-    setupFontSize.value = obj.size;
-    setupFontColor.value = obj.color;
-    setupFontFamily.value = obj.font;
+    setupCurrentMockupId = setupMockupSelect.value;
+    setupMockupImage.src = setupMockups[setupCurrentMockupId].image;
+    setupMockupImage.onload = setupDrawCanvas;
 });
 
-/* ============================================================
-   NUOVO MOCKUP
-   ============================================================ */
-setupBtnNew.addEventListener("click", () => {
-    currentMockupIndex = null;
-    setupMockupSelect.value = "";
-    setupMockupName.value = "";
-    setupOverlayImage = null;
-
-    setupTextObjects = {
-        team: { text: "Squadra", x: 540, y: 150, size: 64, color: "#ffffff", font: "Arial" },
-        score: { text: "Punteggio", x: 540, y: 260, size: 64, color: "#ffffff", font: "Arial" },
-        date: { text: "Data", x: 540, y: 370, size: 48, color: "#ffffff", font: "Arial" }
-    };
-
+setupTextFieldSelect.addEventListener("change", () => {
+    currentField = setupTextFieldSelect.value;
+    syncControlsFromConfig();
     setupDrawCanvas();
 });
 
-/* ============================================================
-   CANCELLA MOCKUP
-   ============================================================ */
-setupBtnDelete.addEventListener("click", () => {
-    if (currentMockupIndex === null) {
-        alert("Seleziona un mockup da cancellare.");
-        return;
-    }
-
-    const list = loadAllMockups();
-    if (!list[currentMockupIndex]) return;
-
-    if (!confirm(`Cancellare il mockup "${list[currentMockupIndex].name}"?`)) return;
-
-    list.splice(currentMockupIndex, 1);
-    saveAllMockups(list);
-
-    currentMockupIndex = null;
-    setupLoadMockupList();
-    setupBtnNew.click();
-});
-
-/* ============================================================
-   CARICA OVERLAY
-   ============================================================ */
-setupOverlayInput.addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-        const dataURL = reader.result;
-        const img = new Image();
-        img.onload = () => {
-            setupOverlayImage = img;
-            setupDrawCanvas();
-        };
-        img.src = dataURL;
-
-        setupOverlayInput.dataset.dataurl = dataURL;
-    };
-    reader.readAsDataURL(file);
-});
-
-/* ============================================================
-   CAMBIO TIPO TESTO
-   ============================================================ */
-setupTextType.addEventListener("change", () => {
-    const key = setupTextType.value;
-    const obj = setupTextObjects[key];
-
-    setupFontSize.value = obj.size;
-    setupFontColor.value = obj.color;
-    setupFontFamily.value = obj.font;
-
+setupBold.addEventListener("change", () => {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    cfg.bold = setupBold.checked;
     setupDrawCanvas();
 });
 
-/* ============================================================
-   MODIFICA STILI TESTO
-   ============================================================ */
-setupFontSize.addEventListener("input", () => {
-    const key = setupTextType.value;
-    setupTextObjects[key].size = parseInt(setupFontSize.value, 10);
+setupItalic.addEventListener("change", () => {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    cfg.italic = setupItalic.checked;
     setupDrawCanvas();
 });
 
-setupFontColor.addEventListener("input", () => {
-    const key = setupTextType.value;
-    setupTextObjects[key].color = setupFontColor.value;
+setupColor.addEventListener("change", () => {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    cfg.color = setupColor.value;
     setupDrawCanvas();
 });
 
-setupFontFamily.addEventListener("change", () => {
-    const key = setupTextType.value;
-    setupTextObjects[key].font = setupFontFamily.value;
-    setupDrawCanvas();
-});
-
-/* ============================================================
-   DRAG & DROP TESTI
-   ============================================================ */
-function setupGetMousePos(evt) {
-    const rect = setupCanvas.getBoundingClientRect();
-    return {
-        x: (evt.clientX - rect.left) * (setupCanvas.width / rect.width),
-        y: (evt.clientY - rect.top) * (setupCanvas.height / rect.height)
-    };
-}
-
-function setupHitTestText(x, y) {
-    for (const key of Object.keys(setupTextObjects)) {
-        const obj = setupTextObjects[key];
-        sctx.font = `${obj.size}px ${obj.font}`;
-        sctx.textAlign = "center";
-
-        const width = sctx.measureText(obj.text).width;
-        const height = obj.size;
-
-        const left = obj.x - width / 2;
-        const right = obj.x + width / 2;
-        const top = obj.y - height;
-        const bottom = obj.y;
-
-        if (x >= left && x <= right && y >= top && y <= bottom) return key;
-    }
-    return null;
-}
-
-setupCanvas.addEventListener("mousedown", e => {
-    const pos = setupGetMousePos(e);
-    const key = setupHitTestText(pos.x, pos.y);
-
-    if (key) {
-        setupDraggingKey = key;
-        setupDragOffsetX = pos.x - setupTextObjects[key].x;
-        setupDragOffsetY = pos.y - setupTextObjects[key].y;
-    }
-});
-
-setupCanvas.addEventListener("mousemove", e => {
-    if (!setupDraggingKey) return;
-
-    const pos = setupGetMousePos(e);
-    setupTextObjects[setupDraggingKey].x = pos.x - setupDragOffsetX;
-    setupTextObjects[setupDraggingKey].y = pos.y - setupDragOffsetY;
-
-    setupDrawCanvas();
-});
-
-setupCanvas.addEventListener("mouseup", () => {
-    setupDraggingKey = null;
-});
-
-setupCanvas.addEventListener("mouseleave", () => {
-    setupDraggingKey = null;
-});
-
-/* ============================================================
-   SALVA MOCKUP
-   ============================================================ */
 setupBtnSave.addEventListener("click", () => {
-    const name = setupMockupName.value.trim();
-    if (!name) {
-        alert("Inserisci un nome mockup.");
-        return;
-    }
-
-    let overlayDataURL = null;
-
-    if (setupOverlayInput.dataset.dataurl) {
-        overlayDataURL = setupOverlayInput.dataset.dataurl;
-    } else if (currentMockupIndex !== null) {
-        const listOld = loadAllMockups();
-        overlayDataURL = listOld[currentMockupIndex]?.overlayDataURL || null;
-    }
-
-    const newMockup = {
-        name,
-        overlayDataURL,
-        textStyles: setupTextObjects
-    };
-
-    const list = loadAllMockups();
-
-    if (currentMockupIndex === null) {
-        list.push(newMockup);
-        currentMockupIndex = list.length - 1;
-    } else {
-        list[currentMockupIndex] = newMockup;
-    }
-
-    saveAllMockups(list);
-    setupLoadMockupList();
-    setupMockupSelect.value = currentMockupIndex.toString();
-
-    alert("Mockup salvato.");
+    saveMockupConfig(setupMockups);
+    alert("Configurazione mockup salvata.");
 });
 
-/* ============================================================
-   INIT
-   ============================================================ */
-setupLoadMockupList();
-setupDrawCanvas();
+// Touch logica: drag posizione + pinch size
+setupCanvas.addEventListener("touchstart", e => {
+    if (e.touches.length === 1) {
+        touchStateSetup.dragging = true;
+        touchStateSetup.pinch = false;
+        touchStateSetup.lastX = e.touches[0].clientX;
+        touchStateSetup.lastY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+        touchStateSetup.dragging = false;
+        touchStateSetup.pinch = true;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchStateSetup.lastDist = Math.hypot(dx, dy);
+    }
+}, { passive: false });
+
+setupCanvas.addEventListener("touchmove", e => {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    const w = setupCanvas.width;
+    const h = setupCanvas.height;
+    e.preventDefault();
+    if (touchStateSetup.dragging && e.touches.length === 1) {
+        const x = e.touches[0].clientX;
+        const y = e.touches[0].clientY;
+        const dx = x - touchStateSetup.lastX;
+        const dy = y - touchStateSetup.lastY;
+        touchStateSetup.lastX = x;
+        touchStateSetup.lastY = y;
+        cfg.x += dx / w;
+        cfg.y += dy / h;
+        if (cfg.x < 0) cfg.x = 0;
+        if (cfg.x > 1) cfg.x = 1;
+        if (cfg.y < 0) cfg.y = 0;
+        if (cfg.y > 1) cfg.y = 1;
+        setupDrawCanvas();
+    } else if (touchStateSetup.pinch && e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const delta = dist - touchStateSetup.lastDist;
+        touchStateSetup.lastDist = dist;
+        const factor = 1 + delta / 300;
+        cfg.size *= factor;
+        if (cfg.size < 10) cfg.size = 10;
+        if (cfg.size > 120) cfg.size = 120;
+        setupDrawCanvas();
+    }
+}, { passive: false });
+
+setupCanvas.addEventListener("touchend", () => {
+    if (event.touches && event.touches.length === 0) {
+        touchStateSetup.dragging = false;
+        touchStateSetup.pinch = false;
+    }
+});
+
+function syncControlsFromConfig() {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    setupBold.checked = !!cfg.bold;
+    setupItalic.checked = !!cfg.italic;
+    setupColor.value = cfg.color || "#ffffff";
+}
+
+// Resize / rotazione
+window.addEventListener("resize", resizeSetupCanvas);
+
+// Init
+(function initSetup() {
+    setupMockups = loadMockupConfig();
+    resizeSetupCanvas();
+    setupLoadMockupList();
+    currentField = setupTextFieldSelect.value;
+    syncControlsFromConfig();
+    setupDrawCanvas();
+})();

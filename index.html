@@ -1,95 +1,69 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8" />
-    <title>Escape Photo - Frontend</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-		<link rel="manifest" href="manifest.json">
-		<meta name="theme-color" content="#000000">
-
-
+    <meta charset="UTF-8">
+    <title>Escape Photo - MindTrap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="mode-front">
+<body class="app-body">
 <div class="app-container">
-
     <header class="app-header">
         <h1>Escape Photo</h1>
-        <button id="btnGoSetup" class="btn-header">Setup mockup</button>
+        <p class="subtitle">MindTrap Escape Room</p>
     </header>
 
     <main class="app-main">
+        <section class="form-section">
+            <label class="field-label" for="frontMockupSelect">Mockup</label>
+            <select id="frontMockupSelect" class="field-input">
+                <option value="mockup1">Mockup 1</option>
+                <option value="mockup2">Mockup 2</option>
+            </select>
 
-        <!-- ANTEPRIMA -->
-        <section class="preview-section">
-            <div class="canvas-wrapper">
-                <canvas id="frontCanvas" width="1080" height="1080"></canvas>
+            <label class="field-label" for="frontTeamName">Nome squadra</label>
+            <input id="frontTeamName" class="field-input" type="text" placeholder="Team name">
+
+            <label class="field-label" for="frontScore">Punteggio / tempo</label>
+            <input id="frontScore" class="field-input" type="text" placeholder="Es: 58:32">
+
+            <label class="field-label" for="frontDateField">Data</label>
+            <input id="frontDateField" class="field-input" type="date">
+
+            <div class="camera-controls">
+                <label class="field-label" for="cameraFacing">Fotocamera</label>
+                <select id="cameraFacing" class="field-input">
+                    <option value="environment">Posteriore</option>
+                    <option value="user">Frontale</option>
+                </select>
+            </div>
+
+            <div class="button-row">
+                <button id="frontBtnCamera" class="btn primary-btn">Scatta foto</button>
+                <button id="frontBtnResetPhoto" class="btn secondary-btn">Reset foto</button>
+            </div>
+
+            <div class="button-row">
+                <button id="frontBtnDownload" class="btn primary-btn">Scarica</button>
+                <button id="frontBtnPrint" class="btn secondary-btn">Stampa</button>
+            </div>
+
+            <div class="button-row">
+                <a href="setup.html" class="btn ghost-btn">Setup mockup</a>
             </div>
         </section>
 
-        <!-- CONTROLLI -->
-        <section class="controls-section">
-
-            <div class="controls-group">
-                <label>Mockup:</label>
-                <select id="frontMockupSelect">
-                    <option value="">-- Seleziona mockup --</option>
-                </select>
+        <section class="preview-section">
+            <div class="preview-wrapper">
+                <canvas id="frontCanvas"></canvas>
+                <video id="frontVideo" autoplay playsinline class="hidden"></video>
             </div>
-
-            <div class="controls-group">
-                <label>Nome squadra:</label>
-                <input type="text" id="frontTeamName" placeholder="Nome squadra" />
-            </div>
-
-            <div class="controls-group">
-                <label>Punteggio:</label>
-                <input type="text" id="frontScore" placeholder="Es: 5/10" />
-            </div>
-
-            <div class="controls-group">
-                <label>Data:</label>
-                <input type="date" id="frontDateField" />
-            </div>
-
-            <hr />
-
-            <div class="controls-group">
-                <button id="frontBtnCamera">Scatta foto</button>
-                <button id="frontBtnLoadPhoto">Carica foto</button>
-                <button id="frontBtnClearPhoto">Cancella foto</button>
-                <input type="file" id="frontPhotoInput" accept="image/*" style="display:none;" />
-            </div>
-
-            <div class="controls-group">
-                <label>Zoom foto:</label>
-                <input type="range" id="frontPhotoZoom" min="0.3" max="2" step="0.05" value="1" />
-                <small>Trascina la foto per posizionarla sotto l'overlay.</small>
-            </div>
-
-            <hr />
-
-            <div class="controls-group">
-                <label>Formato stampa:</label>
-                <select id="frontPrintFormat">
-                    <option value="a4">A4</option>
-                    <option value="a5">A5</option>
-                </select>
-            </div>
-
-            <div class="controls-group">
-                <button id="frontBtnPrint">Stampa</button>
-                <button id="frontBtnSave">Salva immagine</button>
-                <button id="frontBtnShare">Condividi</button>
-            </div>
-
+            <p class="hint">Usa due dita per zoomare, trascina la foto per posizionarla.</p>
         </section>
     </main>
-
 </div>
-
-<!-- STREAM FOTOCAMERA -->
-<video id="frontCameraStream" autoplay playsinline style="display:none;"></video>
 
 <script src="shared.js"></script>
 <script src="app.js"></script>
