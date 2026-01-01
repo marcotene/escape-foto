@@ -1,11 +1,17 @@
 let setupMockups = loadMockupConfig();
 
 const setupMockupSelect = document.getElementById("setupMockupSelect");
-const setupTextFieldSelect = document.getElementById("setupTextFieldSelect");
-const setupBold = document.getElementById("setupBold");
-const setupItalic = document.getElementById("setupItalic");
-const setupColor = document.getElementById("setupColor");
+const setupUploadMockup = document.getElementById("setupUploadMockup");
+const setupBtnEditMockup = document.getElementById("setupBtnEditMockup");
+const setupBtnDeleteMockup = document.getElementById("setupBtnDeleteMockup");
 const setupBtnSave = document.getElementById("setupBtnSave");
+
+const menu = document.getElementById("sideMenu");
+const menuColor = document.getElementById("menuColor");
+const menuFont = document.getElementById("menuFont");
+const menuBold = document.getElementById("menuBold");
+const menuItalic = document.getElementById("menuItalic");
+const menuClose = document.getElementById("menuClose");
 
 const setupCanvas = document.getElementById("setupCanvas");
 const setupCtx = setupCanvas.getContext("2d");
@@ -13,13 +19,16 @@ const setupCtx = setupCanvas.getContext("2d");
 let setupCurrentMockupId = "mockup1";
 let setupMockupImage = new Image();
 
-let currentField = "team";
-let touchStateSetup = {
+let currentField = null; // team, score, date
+
+// Touch state
+let touchState = {
     dragging: false,
+    pinch: false,
     lastX: 0,
     lastY: 0,
-    pinch: false,
-    lastDist: 0
+    lastDist: 0,
+    longPressTimer: null
 };
 
 function resizeSetupCanvas() {
@@ -46,12 +55,13 @@ function setupDrawCanvas() {
     const w = setupCanvas.width;
     const h = setupCanvas.height;
     setupCtx.clearRect(0, 0, w, h);
-    setupCtx.fillStyle = "#000000";
+    setupCtx.fillStyle = "#000";
     setupCtx.fillRect(0, 0, w, h);
 
     const cfg = setupMockups[setupCurrentMockupId];
     if (!cfg) return;
 
+    // Draw mockup
     if (setupMockupImage.complete && setupMockupImage.naturalWidth > 0) {
         const iw = setupMockupImage.naturalWidth;
         const ih = setupMockupImage.naturalHeight;
@@ -63,144 +73,227 @@ function setupDrawCanvas() {
         setupCtx.drawImage(setupMockupImage, dx, dy, dw, dh);
     }
 
+    // Draw texts
     const map = cfg.textStyles;
 
-    function drawText(label, key, styleCfg) {
-        const x = styleCfg.x * w;
-        const y = styleCfg.y * h;
+    function drawField(label, key, style) {
+        const x = style.x * w;
+        const y = style.y * h;
+
         let fontParts = [];
-        if (styleCfg.italic) fontParts.push("italic");
-        if (styleCfg.bold) fontParts.push("bold");
-        fontParts.push(styleCfg.size + "px");
-        fontParts.push("Impact, system-ui, sans-serif");
+        if (style.italic) fontParts.push("italic");
+        if (style.bold) fontParts.push("bold");
+        fontParts.push(style.size + "px");
+        fontParts.push(style.font || "Impact");
         setupCtx.font = fontParts.join(" ");
-        setupCtx.fillStyle = styleCfg.color;
-        setupCtx.textAlign = styleCfg.align || "center";
+        setupCtx.fillStyle = style.color;
+        setupCtx.textAlign = "center";
         setupCtx.textBaseline = "middle";
-        const text = label + " (" + key + ")";
+
+        const text = label;
         setupCtx.fillText(text, x, y);
-        if (key === currentField) {
+
+        // Highlight selected
+        if (currentField === key) {
             setupCtx.strokeStyle = "#ff4444";
             setupCtx.lineWidth = 2;
             const metrics = setupCtx.measureText(text);
             const width = metrics.width;
-            const height = styleCfg.size;
+            const height = style.size;
             setupCtx.strokeRect(x - width / 2 - 4, y - height / 2 - 4, width + 8, height + 8);
         }
     }
 
-    drawText("Nome squadra", "team", map.team);
-    drawText("Punteggio/tempo", "score", map.score);
-    drawText("Data", "date", map.date);
+    drawField("Nome squadra", "team", map.team);
+    drawField("Punteggio/tempo", "score", map.score);
+    drawField("Data", "date", map.date);
 }
 
-setupMockupSelect.addEventListener("change", () => {
-    setupCurrentMockupId = setupMockupSelect.value;
-    setupMockupImage.src = setupMockups[setupCurrentMockupId].image;
-    setupMockupImage.onload = setupDrawCanvas;
-});
+// Hit detection
+function detectFieldTouch(x, y) {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles;
+    const w = setupCanvas.width;
+    const h = setupCanvas.height;
 
-setupTextFieldSelect.addEventListener("change", () => {
-    currentField = setupTextFieldSelect.value;
-    syncControlsFromConfig();
-    setupDrawCanvas();
-});
+    for (const key of ["team", "score", "date"]) {
+        const style = cfg[key];
+        const tx = style.x * w;
+        const ty = style.y * h;
 
-setupBold.addEventListener("change", () => {
-    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
-    cfg.bold = setupBold.checked;
-    setupDrawCanvas();
-});
+        setupCtx.font = `${style.bold ? "bold " : ""}${style.italic ? "italic " : ""}${style.size}px ${style.font || "Impact"}`;
+        const metrics = setupCtx.measureText(key);
+        const width = metrics.width;
+        const height = style.size;
 
-setupItalic.addEventListener("change", () => {
-    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
-    cfg.italic = setupItalic.checked;
-    setupDrawCanvas();
-});
+        if (
+            x >= tx - width / 2 - 10 &&
+            x <= tx + width / 2 + 10 &&
+            y >= ty - height / 2 - 10 &&
+            y <= ty + height / 2 + 10
+        ) {
+            return key;
+        }
+    }
+    return null;
+}
 
-setupColor.addEventListener("change", () => {
-    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
-    cfg.color = setupColor.value;
-    setupDrawCanvas();
-});
-
-setupBtnSave.addEventListener("click", () => {
-    saveMockupConfig(setupMockups);
-    alert("Configurazione mockup salvata.");
-});
-
-// Touch logica: drag posizione + pinch size
+// Touch events
 setupCanvas.addEventListener("touchstart", e => {
+    const rect = setupCanvas.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    const y = e.touches[0].clientY - rect.top;
+
+    const hit = detectFieldTouch(x, y);
+    if (hit) {
+        currentField = hit;
+        setupDrawCanvas();
+
+        // Long press → open menu
+        touchState.longPressTimer = setTimeout(() => {
+            openMenu();
+        }, 500);
+    }
+
     if (e.touches.length === 1) {
-        touchStateSetup.dragging = true;
-        touchStateSetup.pinch = false;
-        touchStateSetup.lastX = e.touches[0].clientX;
-        touchStateSetup.lastY = e.touches[0].clientY;
+        touchState.dragging = true;
+        touchState.lastX = x;
+        touchState.lastY = y;
     } else if (e.touches.length === 2) {
-        touchStateSetup.dragging = false;
-        touchStateSetup.pinch = true;
+        touchState.pinch = true;
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
-        touchStateSetup.lastDist = Math.hypot(dx, dy);
+        touchState.lastDist = Math.hypot(dx, dy);
     }
 }, { passive: false });
 
 setupCanvas.addEventListener("touchmove", e => {
+    if (!currentField) return;
+    e.preventDefault();
+
+    clearTimeout(touchState.longPressTimer);
+
     const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    const rect = setupCanvas.getBoundingClientRect();
     const w = setupCanvas.width;
     const h = setupCanvas.height;
-    e.preventDefault();
-    if (touchStateSetup.dragging && e.touches.length === 1) {
-        const x = e.touches[0].clientX;
-        const y = e.touches[0].clientY;
-        const dx = x - touchStateSetup.lastX;
-        const dy = y - touchStateSetup.lastY;
-        touchStateSetup.lastX = x;
-        touchStateSetup.lastY = y;
+
+    if (touchState.dragging && e.touches.length === 1) {
+        const x = e.touches[0].clientX - rect.left;
+        const y = e.touches[0].clientY - rect.top;
+
+        const dx = x - touchState.lastX;
+        const dy = y - touchState.lastY;
+
+        touchState.lastX = x;
+        touchState.lastY = y;
+
         cfg.x += dx / w;
         cfg.y += dy / h;
-        if (cfg.x < 0) cfg.x = 0;
-        if (cfg.x > 1) cfg.x = 1;
-        if (cfg.y < 0) cfg.y = 0;
-        if (cfg.y > 1) cfg.y = 1;
+
+        cfg.x = Math.max(0, Math.min(1, cfg.x));
+        cfg.y = Math.max(0, Math.min(1, cfg.y));
+
         setupDrawCanvas();
-    } else if (touchStateSetup.pinch && e.touches.length === 2) {
+    }
+
+    if (touchState.pinch && e.touches.length === 2) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const dist = Math.hypot(dx, dy);
-        const delta = dist - touchStateSetup.lastDist;
-        touchStateSetup.lastDist = dist;
-        const factor = 1 + delta / 300;
-        cfg.size *= factor;
-        if (cfg.size < 10) cfg.size = 10;
-        if (cfg.size > 120) cfg.size = 120;
+        const delta = dist - touchState.lastDist;
+        touchState.lastDist = dist;
+
+        cfg.size += delta * 0.2;
+        cfg.size = Math.max(10, Math.min(150, cfg.size));
+
         setupDrawCanvas();
     }
 }, { passive: false });
 
 setupCanvas.addEventListener("touchend", () => {
-    if (event.touches && event.touches.length === 0) {
-        touchStateSetup.dragging = false;
-        touchStateSetup.pinch = false;
-    }
+    clearTimeout(touchState.longPressTimer);
+    touchState.dragging = false;
+    touchState.pinch = false;
 });
 
-function syncControlsFromConfig() {
+// MENU LATERALE
+function openMenu() {
+    if (!currentField) return;
     const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
-    setupBold.checked = !!cfg.bold;
-    setupItalic.checked = !!cfg.italic;
-    setupColor.value = cfg.color || "#ffffff";
+
+    menuColor.value = cfg.color;
+    menuFont.value = cfg.font || "Impact";
+
+    menu.classList.add("open");
 }
 
-// Resize / rotazione
+menuClose.addEventListener("click", () => {
+    menu.classList.remove("open");
+});
+
+menuColor.addEventListener("input", () => {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    cfg.color = menuColor.value;
+    setupDrawCanvas();
+});
+
+menuFont.addEventListener("change", () => {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    cfg.font = menuFont.value;
+    setupDrawCanvas();
+});
+
+menuBold.addEventListener("click", () => {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    cfg.bold = !cfg.bold;
+    setupDrawCanvas();
+});
+
+menuItalic.addEventListener("click", () => {
+    const cfg = setupMockups[setupCurrentMockupId].textStyles[currentField];
+    cfg.italic = !cfg.italic;
+    setupDrawCanvas();
+});
+
+// MOCKUP MANAGEMENT
+setupUploadMockup.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        setupMockups[setupCurrentMockupId].image = reader.result;
+        setupMockupImage.src = reader.result;
+        setupDrawCanvas();
+    };
+    reader.readAsDataURL(file);
+});
+
+setupBtnEditMockup.addEventListener("click", () => {
+    const newName = prompt("Nuovo nome mockup:", setupMockups[setupCurrentMockupId].label);
+    if (!newName) return;
+    setupMockups[setupCurrentMockupId].label = newName;
+    setupLoadMockupList();
+});
+
+setupBtnDeleteMockup.addEventListener("click", () => {
+    if (!confirm("Eliminare questo mockup?")) return;
+    delete setupMockups[setupCurrentMockupId];
+    saveMockupConfig(setupMockups);
+    location.reload();
+});
+
+setupBtnSave.addEventListener("click", () => {
+    saveMockupConfig(setupMockups);
+    alert("Configurazione salvata.");
+});
+
+// INIT
 window.addEventListener("resize", resizeSetupCanvas);
 
-// Init
-(function initSetup() {
+(function init() {
     setupMockups = loadMockupConfig();
     resizeSetupCanvas();
     setupLoadMockupList();
-    currentField = setupTextFieldSelect.value;
-    syncControlsFromConfig();
     setupDrawCanvas();
 })();

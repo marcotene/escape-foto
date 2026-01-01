@@ -19,6 +19,26 @@
             <select id="setupMockupSelect" class="field-input">
                 <option value="mockup1">Mockup 1</option>
                 <option value="mockup2">Mockup 2</option>
+
+<div class="button-row">
+    <label class="btn secondary-btn">
+        Carica immagine mockup
+        <input type="file" id="setupUploadMockup" accept="image/*" hidden>
+    </label>
+</div>
+
+
+<div class="button-row">
+    <button id="setupBtnEditMockup" class="btn ghost-btn">Modifica mockup</button>
+    <button id="setupBtnDeleteMockup" class="btn secondary-btn">Cancella mockup</button>
+</div>
+
+
+<div class="button-row">
+    <button id="setupBtnEditMockup" class="btn ghost-btn">Modifica mockup</button>
+    <button id="setupBtnDeleteMockup" class="btn secondary-btn">Cancella mockup</button>
+</div>
+
             </select>
 
             <label class="field-label" for="setupTextFieldSelect">Campo</label>
@@ -36,6 +56,14 @@
                 <label class="checkbox-label">
                     <input type="checkbox" id="setupItalic"> Italic
                 </label>
+<label class="field-label">Font</label>
+<select id="setupFont" class="field-input">
+    <option value="Impact">Impact</option>
+    <option value="Anton">Anton</option>
+    <option value="Bebas Neue">Bebas Neue</option>
+    <option value="Arial Black">Arial Black</option>
+</select>
+
             </div>
 
             <label class="field-label" for="setupColor">Colore</label>

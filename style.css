@@ -1,189 +1,63 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Setup Mockup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-body">
 
-html, body {
-    height: 100%;
-    background: #000;
-    color: #f5f5f5;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+<div class="preview-section">
+    <div class="preview-wrapper">
+        <canvas id="setupCanvas"></canvas>
+    </div>
+    <p class="hint">Tocca un testo per selezionarlo. Tieni premuto per modificare.</p>
+</div>
 
-.app-body {
-    min-height: 100vh;
-}
+<div class="form-section scrollable">
+    <label class="field-label">Mockup</label>
+    <select id="setupMockupSelect" class="field-input"></select>
 
-.app-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    padding: 8px;
-}
+    <div class="button-row">
+        <label class="btn secondary-btn">
+            Carica immagine mockup
+            <input type="file" id="setupUploadMockup" accept="image/*" hidden>
+        </label>
+    </div>
 
-.app-header {
-    text-align: center;
-    padding: 8px 4px;
-}
+    <div class="button-row">
+        <button id="setupBtnEditMockup" class="btn ghost-btn">Modifica mockup</button>
+        <button id="setupBtnDeleteMockup" class="btn secondary-btn">Cancella mockup</button>
+    </div>
 
-.app-header h1 {
-    font-size: 1.4rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
+    <div class="button-row">
+        <button id="setupBtnSave" class="btn primary-btn">Salva configurazione</button>
+        <a href="index.html" class="btn ghost-btn">Torna al frontend</a>
+    </div>
+</div>
 
-.subtitle {
-    font-size: 0.8rem;
-    color: #bbbbbb;
-}
+<!-- MENU LATERALE -->
+<div id="sideMenu" class="side-menu">
+    <h3>Modifica testo</h3>
 
-.app-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 4px;
-}
+    <label>Colore</label>
+    <input type="color" id="menuColor">
 
-/* Mobile-first layout: form sopra, preview sotto */
-.form-section, .preview-section {
-    background: #111;
-    border-radius: 8px;
-    padding: 8px;
-}
+    <label>Font</label>
+    <select id="menuFont">
+        <option value="Impact">Impact</option>
+        <option value="Anton">Anton</option>
+        <option value="Bebas Neue">Bebas Neue</option>
+        <option value="Arial Black">Arial Black</option>
+    </select>
 
-.field-label {
-    font-size: 0.8rem;
-    margin-top: 6px;
-    display: block;
-}
+    <button id="menuBold">Bold</button>
+    <button id="menuItalic">Italic</button>
+    <button id="menuClose" class="secondary-btn">Chiudi</button>
+</div>
 
-.field-input {
-    width: 100%;
-    padding: 6px 8px;
-    margin-top: 2px;
-    border-radius: 4px;
-    border: 1px solid #333;
-    background: #000;
-    color: #f5f5f5;
-    font-size: 0.85rem;
-}
-
-.camera-controls {
-    margin-top: 8px;
-}
-
-.button-row {
-    display: flex;
-    gap: 6px;
-    margin-top: 8px;
-}
-
-.button-row .btn {
-    flex: 1;
-}
-
-.btn {
-    padding: 8px;
-    border-radius: 4px;
-    border: none;
-    font-size: 0.85rem;
-    text-align: center;
-    cursor: pointer;
-}
-
-.primary-btn {
-    background: #e53935;
-    color: #fff;
-}
-
-.secondary-btn {
-    background: #333;
-    color: #fff;
-}
-
-.ghost-btn {
-    background: transparent;
-    color: #f5f5f5;
-    border: 1px solid #444;
-    text-decoration: none;
-}
-
-/* Preview */
-.preview-wrapper {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 3 / 4; /* 3:4 tipico ritratto */
-    background: #000;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #333;
-}
-
-#frontCanvas,
-#setupCanvas,
-#frontVideo {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-#frontVideo.hidden {
-    display: none;
-}
-
-.hint {
-    font-size: 0.75rem;
-    margin-top: 6px;
-    color: #999;
-}
-
-/* Checkbox inline */
-.inline-row {
-    display: flex;
-    gap: 12px;
-    margin-top: 4px;
-}
-
-.checkbox-label {
-    font-size: 0.8rem;
-}
-
-/* Layout per schermi più grandi (tablet landscape / desktop) */
-@media (min-width: 768px) {
-    .app-main {
-        flex-direction: row;
-    }
-
-    .form-section, .preview-section {
-        flex: 1;
-    }
-
-    .preview-wrapper {
-        aspect-ratio: 16 / 9;
-    }
-}
-
-/* Stampa: solo l’immagine, una sola pagina */
-@media print {
-    body, html {
-        margin: 0;
-        padding: 0;
-    }
-
-    .app-container,
-    .app-main,
-    .form-section,
-    .preview-section,
-    .hint {
-        display: none !important;
-    }
-
-    img.print-image {
-        display: block;
-        width: 100%;
-        page-break-after: avoid;
-    }
-}
+<script src="shared.js"></script>
+<script src="setup.js"></script>
+</body>
+</html>
